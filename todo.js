@@ -41,14 +41,16 @@ firebase.auth().onAuthStateChanged(async function(user) {
     })
 
     // Show only my to-dos
-    let querySnapshot = await db.collection('todos').where('userId', '==', user.uid).get()
-    console.log(`Number to todos in collection: ${querySnapshot.size}`)
+    // let querySnapshot = await db.collection('todos').where('userId', '==', user.uid).get()
+    // console.log(`Number to todos in collection: ${querySnapshot.size}`)
 
-    let todos = querySnapshot.docs
+    // let todos = querySnapshot.docs
+    let response = await fetch(`http://localhost:8888/.netlify/functions/get_todos?userId=${user.uid}`)
+    let todos = await response.json()
     for (let i=0; i<todos.length; i++) {
       let todoId = todos[i].id
-      let todo = todos[i].data()
-      let todoText = todo.text
+      // let todo = todos[i].data()
+      let todoText = todos[i].text
 
       document.querySelector('.todos').insertAdjacentHTML('beforeend', `
         <div class="todo-${todoId} py-4 text-xl border-b-2 border-purple-500 w-full">
@@ -96,3 +98,23 @@ firebase.auth().onAuthStateChanged(async function(user) {
     ui.start('.sign-in-or-sign-out', authUIConfig)
   }
 })
+
+// Goals:   Move the part of the code that gets todos when the page is loaded
+//          to the backend lambda function – separate responsibilities of the
+//          front-end and the back-end
+//
+// Step 0:  Setup. Start your server in the Terminal using the command `netlify dev`.
+//          Visit /.netlify/functions/test in the browser to confirm the server is running and you can access it.
+//          Add firebase config into todos.html and verify frontend application still works as it did last week.
+//          Add firebase config into netlify/functions/firebase.js so that the backend also has access to firebase.
+// Step 1:  Read data from firestore in the backend. In the netlify function get_todos.js, retrieve all of the todos from firestore.
+//          Console log the number of todos to confirm it's reading the data.
+// Step 2:  Build the API response. Loop through the todos collection. The backend has no access to manipulate the DOM, so instead we'll expose the desired data to the frontend.
+//          Inside the loop, use .push() to add a javascript object into the todosData array with each todo's id and text values.
+//          Visit localhost:****/.netlify/functions/get_todos in the browser to see the todos data. That's your API response!
+// Step 3:  Filter todos by userId. Append the get_todos API URL with the userId as a query string parameter
+//          and the user's id as its value: /.netlify/functions/get_todos?userId=****
+//          The query string data is available in the event.queryStringParameters object.
+//          Use the userId from the query string to filter the firestore collection.
+// Step 4:  Get the current user's todos from the API instead of firestore.
+//          In todo.js, replace the code that's reading directly from firestore with a fetch() request to the server.

@@ -1,8 +1,10 @@
+console.log('Secret sauce')
+
 exports.handler = async function(event) {
   return {
     statusCode: 200,
     body: JSON.stringify({
-      thingToKnow: 'KIEI-451 is awesome'
+      thingToKnow: 'KIEI-451 is awesome!'
     })
   }
 }
